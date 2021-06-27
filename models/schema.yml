@@ -1,0 +1,43 @@
+version: 2
+
+models:
+  - name: raw_bike_hires
+    description: '{{ doc("raw_bikes_hires") }}'
+
+  - name: raw_bike_stations
+    description: This table contains all bike stations in the London area. This only includes stations intalled before January 1, 2017 and doesn't include stations that were removed in 2017 (before Jan 1 2018). This is the raw data so no cleaning or transformation.
+    columns:
+      - name: id
+        description: Primary Key 
+
+  - name: cleaned_bike_rides
+    description: >
+      This table contains a transformed version of the raw_bike_hires table, which includes additional calculated fields such as creating a duration in minutes field. 
+      Each ride has been aggregated so any journey that starts and ends at the same station, in the same month and roughly time of day are 
+      aggregated together to get the total minutes similar journeys have taken.
+    columns:
+      - name: total_minutes
+        description: The total minutes of a particular journey in a month and general time of day. 
+        tests:
+          - not_null
+          - dbt_utils.at_least_one
+      - name: total_bike_hires
+        tests:
+        description: Total number of bike hires of the same journey in a particular month and time of day
+          - not_null
+          - dbt_utils.at_least_one
+      - name: month
+        description: Month the bike hire was in
+        tests:
+          - not_null
+          - dbt_utils.at_least_one
+      - name: start_peak_travel
+        tests:
+          - accepted_values:
+              values: ['Evening Peak', 'Off-Peak', 'Morning Peak']
+      - name: same_station_flag
+        tests:
+          - not_null
+      - name: start_station_name
+        tests:
+          - not_null
